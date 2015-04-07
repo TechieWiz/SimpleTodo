@@ -13,3 +13,4 @@ Functional Items:
 
 App Walktrough
 
+![alt tag](https://github.com/TechieWiz/SimpleTodo/blob/master/ToDo.gif)
