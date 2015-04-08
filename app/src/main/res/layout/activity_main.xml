@@ -11,21 +11,10 @@
         android:layout_height="wrap_content"
         android:text="@string/add_button_label"
         android:id="@+id/btnAddItem"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:onClick="onAddItem"/>
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/etNewItem"
+        android:onClick="onAddItem"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_alignTop="@+id/btnAddItem"
-        android:layout_toStartOf="@+id/btnAddItem"
-        android:layout_toLeftOf="@id/btnAddItem"
-        android:hint="@string/new_item_hint" />
+        android:layout_alignEnd="@+id/lvItems" />
 
     <ListView
         android:layout_width="wrap_content"

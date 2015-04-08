@@ -1,26 +1,27 @@
 package techiewiz.simpletodo;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
+import techiewiz.simpletodo.db.TodoDBHelper;
+import techiewiz.simpletodo.model.Todo;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -32,18 +33,21 @@ public class MainActivity extends ActionBarActivity {
     ListView lvItems;
     int selectedPos;
     String selectedItem;
+    TodoDBHelper db;
+    List<Todo> todoList;
+    ArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        db = new TodoDBHelper(this);
+
         lvItems = (ListView) findViewById(R.id.lvItems);
-        items = new ArrayList<String>();
-        readItems();
-        itemsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,items);
-        lvItems.setAdapter(itemsAdapter);
-        //items.add("Setup Android Studio");
-        //items.add("Setup ADB");
+        todoList = db.getAllTodo();
+        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,todoList);
+        lvItems.setAdapter(adapter);
+
         setupListViewListener();
     }
 
@@ -51,9 +55,27 @@ public class MainActivity extends ActionBarActivity {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                items.remove(position);
-                itemsAdapter.notifyDataSetChanged();
-                writeItems();
+                final Todo itemTodo = todoList.get(position);
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(context);
+                alert.setMessage("Confirm deletion of " + itemTodo.getTitle()+"?");
+
+                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        db.deleteTodo(itemTodo);
+                        adapter.remove(itemTodo);
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+
+                alert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.cancel();
+                    }
+                }); //End of alert.setNegativeButton
+                AlertDialog alertDialog = alert.create();
+                alertDialog.show();
+
                 return true;
             }
         });
@@ -61,25 +83,19 @@ public class MainActivity extends ActionBarActivity {
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-                selectedPos = position;
-                selectedItem = items.get(position).toString();
-                //EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
-                //etNewItem.setText(selectedItem);
+                final Todo itemTodo = todoList.get(position);
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
-                alert.setTitle("Edit item");
+                alert.setTitle("View Todo");
+                alert.setMessage(itemTodo.getTitle() + "\n" + itemTodo.getDescription());
 
-                final EditText input = new EditText(context);
-                input.setText(selectedItem);
-                alert.setView(input);
-
-                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                alert.setPositiveButton("Edit", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        String itemText = input.getText().toString();
-                        items.set(selectedPos, itemText);
-                        itemsAdapter.notifyDataSetChanged();
-                        selectedPos = 0;
-                        selectedItem = null;
+                        Bundle b = new Bundle();
+                        b.putSerializable("todoObj", itemTodo);
+                        Intent todoList = new Intent(context, EditTodo.class);
+                        Intent intent = todoList.putExtras(b);
+                        startActivity(todoList);
                     }
                 });
                 alert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -116,11 +132,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void onAddItem(View view) {
-        EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
-        String itemText = etNewItem.getText().toString();
-        itemsAdapter.add(itemText);
-        etNewItem.setText("");
-        writeItems();
+        Intent intent = new Intent(this, NewTodo.class);
+        startActivity(intent);
     }
 
     private void readItems(){
@@ -133,12 +146,12 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void writeItems(){
+    private void writeItems() {
         File filesDir = getFilesDir();
-        File todoFile = new File(filesDir,"todo.txt");
-        try{
+        File todoFile = new File(filesDir, "todo.txt");
+        try {
             FileUtils.writeLines(todoFile, items);
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
