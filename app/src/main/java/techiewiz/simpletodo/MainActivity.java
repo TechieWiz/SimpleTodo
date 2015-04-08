@@ -1,6 +1,9 @@
 package techiewiz.simpletodo;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
@@ -20,6 +24,8 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    final Context context = this;
 
     ArrayList<String> items;
     ArrayAdapter<String> itemsAdapter;
@@ -57,8 +63,32 @@ public class MainActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 selectedPos = position;
                 selectedItem = items.get(position).toString();
-                EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
-                etNewItem.setText(selectedItem);
+                //EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
+                //etNewItem.setText(selectedItem);
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(context);
+                alert.setTitle("Edit item");
+
+                final EditText input = new EditText(context);
+                input.setText(selectedItem);
+                alert.setView(input);
+
+                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String itemText = input.getText().toString();
+                        items.set(selectedPos, itemText);
+                        itemsAdapter.notifyDataSetChanged();
+                        selectedPos = 0;
+                        selectedItem = null;
+                    }
+                });
+                alert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.cancel();
+                    }
+                }); //End of alert.setNegativeButton
+                AlertDialog alertDialog = alert.create();
+                alertDialog.show();
             }
         });
     }
@@ -88,14 +118,7 @@ public class MainActivity extends ActionBarActivity {
     public void onAddItem(View view) {
         EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
         String itemText = etNewItem.getText().toString();
-        if(selectedItem == null || selectedItem.equals(""))
-            itemsAdapter.add(itemText);
-        else {
-            items.set(selectedPos,itemText);
-            itemsAdapter.notifyDataSetChanged();
-            selectedPos = 0;
-            selectedItem = null;
-        }
+        itemsAdapter.add(itemText);
         etNewItem.setText("");
         writeItems();
     }
