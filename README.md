@@ -1,8 +1,7 @@
 Simple TODO App
 ============================================
 
-A simple android app to demonstrate single screen to display list items, add new list item, edit existing list item and delete a list item.
-List is saved in a file for persitence.
+A simple android app to demonstrate Tod CRUD operations. List is saved into Database.
 
 Functional Items:
 
@@ -10,6 +9,7 @@ Functional Items:
   - Add new item to list
   - Delete item from list
   - Edit an item from list
+  - Alert Dialog for Editing/Deleting item
 
 App Walktrough
 
