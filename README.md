@@ -10,6 +10,7 @@ Functional Items:
   - Delete item from list
   - Edit an item from list
   - Alert Dialog for Editing/Deleting item
+  - Material Design Support
 
 App Walktrough
 
