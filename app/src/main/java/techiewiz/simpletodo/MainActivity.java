@@ -1,5 +1,6 @@
 package techiewiz.simpletodo;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,7 +12,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
@@ -24,7 +28,7 @@ import techiewiz.simpletodo.db.TodoDBHelper;
 import techiewiz.simpletodo.model.Todo;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     final Context context = this;
 
@@ -65,6 +69,8 @@ public class MainActivity extends ActionBarActivity {
                         db.deleteTodo(itemTodo);
                         adapter.remove(itemTodo);
                         adapter.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(), "Deleted Todo "+itemTodo.getTitle(),
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -85,17 +91,38 @@ public class MainActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 final Todo itemTodo = todoList.get(position);
 
-                AlertDialog.Builder alert = new AlertDialog.Builder(context);
-                alert.setTitle("View Todo");
-                alert.setMessage(itemTodo.getTitle() + "\n" + itemTodo.getDescription());
+                LinearLayout layout = new LinearLayout(context);
+                layout.setOrientation(LinearLayout.VERTICAL);
 
-                alert.setPositiveButton("Edit", new DialogInterface.OnClickListener() {
+                AlertDialog.Builder alert = new AlertDialog.Builder(context);
+                alert.setTitle("Todo");
+                //alert.setMessage(itemTodo.getTitle() + "\n" + itemTodo.getDescription());
+
+                final EditText etTitle = new EditText(context);
+                etTitle.setText(itemTodo.getTitle());
+                layout.addView(etTitle);
+
+                final EditText etDesc = new EditText(context);
+                etDesc.setText(itemTodo.getDescription());
+                layout.addView(etDesc);
+
+                alert.setView(layout);
+
+                alert.setPositiveButton("Update", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
+                        /*
                         Bundle b = new Bundle();
                         b.putSerializable("todoObj", itemTodo);
                         Intent todoList = new Intent(context, EditTodo.class);
                         Intent intent = todoList.putExtras(b);
                         startActivity(todoList);
+                        */
+                        itemTodo.setTitle(etTitle.getText().toString());
+                        itemTodo.setDescription(etDesc.getText().toString());
+                        db.updateTodo(itemTodo);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(), "Updated Todo "+itemTodo.getTitle(),
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
                 alert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {

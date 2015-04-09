@@ -1,5 +1,6 @@
 package techiewiz.simpletodo;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -13,7 +14,7 @@ import techiewiz.simpletodo.db.TodoDBHelper;
 import techiewiz.simpletodo.model.Todo;
 
 
-public class EditTodo extends ActionBarActivity {
+public class EditTodo extends Activity {
 
     TodoDBHelper db;
     Todo selectedItem;
